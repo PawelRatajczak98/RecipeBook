@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using RecipeBook.Api.Models;
+using System.Security.Claims;
 
 namespace RecipeBook.Api.Services
 {
@@ -62,22 +63,49 @@ namespace RecipeBook.Api.Services
         {
             var userClaims = httpContextAccessor.HttpContext?.User;
             if (userClaims == null)
-                return null;
+                throw new Exception("HttpContext.User is null.");
+
+            if (!userClaims.Identity.IsAuthenticated)
+            {
+                // Debug: wypisz wszystkie claimy
+                var claimsDebug = string.Join(", ", userClaims.Claims.Select(c => $"{c.Type}: {c.Value}"));
+                throw new Exception($"User is not authenticated1. Claims: {claimsDebug}");
+            }
 
             var userId = userManager.GetUserId(userClaims);
             if (string.IsNullOrEmpty(userId))
-                return null;
+            {
+                var claimsDebug = string.Join(", ", userClaims.Claims.Select(c => $"{c.Type}: {c.Value}"));
+                throw new Exception($"User ID not found in token claims. Claims: {claimsDebug}");
+            }
 
-            return await userManager.FindByIdAsync(userId);
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
+                throw new Exception("User not found in the database.");
+
+            return user;
         }
 
         public string GetCurrentUserId()
         {
             var userClaims = httpContextAccessor.HttpContext?.User;
             if (userClaims == null)
-                return null;
+                throw new Exception("HttpContext.User is null.");
 
-            return userManager.GetUserId(userClaims);
+            if (!userClaims.Identity.IsAuthenticated)
+            {
+                var claimsDebug = string.Join(", ", userClaims.Claims.Select(c => $"{c.Type}: {c.Value}"));
+                throw new Exception($"User is not authenticated2. Claims: {claimsDebug}");
+            }
+
+            var userId = userManager.GetUserId(userClaims);
+            if (string.IsNullOrEmpty(userId))
+            {
+                var claimsDebug = string.Join(", ", userClaims.Claims.Select(c => $"{c.Type}: {c.Value}"));
+                throw new Exception($"User ID not found in token claims. Claims: {claimsDebug}");
+            }
+
+            return userId;
         }
     }
 }

@@ -6,10 +6,11 @@ namespace RecipeBook.Api.Services
 {
     public interface IRecipeService
     {
-        Task<Recipe> CreateRecipeAsync(Recipe recipe);
-        Task<IEnumerable<Recipe>> GetAllRecipesAsync();
-        Task<Recipe> GetRecipeByIdAsync(int id);
-        Task<Recipe> UpdateRecipeAsync(int id, Recipe recipe);
+        Task<IEnumerable<Recipe>> GetAllAsync();
+        Task<Recipe> GetByIdAsync(int id);
+        Task<Recipe> CreateAsync(RecipeCreateDto recipeCreateDto);
+        Task<Recipe> UpdateAsync(int id, Recipe recipe);
+        Task<bool> DeleteAsync(int id);
     }
 
     public class RecipeService : IRecipeService
@@ -22,19 +23,16 @@ namespace RecipeBook.Api.Services
             _context = context;
             _authService = authService;
         }
-        public async Task<Recipe> CreateRecipeAsync(Recipe recipe)
-        {       
-            _context.Recipes.Add(recipe);
-            await _context.SaveChangesAsync();
-            return recipe;    
-        }
 
-        public async Task<IEnumerable<Recipe>> GetAllRecipesAsync()
+        public async Task<IEnumerable<Recipe>> GetAllAsync()
         {
-            return await _context.Recipes.ToListAsync();
+            return await _context.Recipes
+                .Include(r => r.RecipeIngredients)
+                .ThenInclude(ri => ri.Ingredient)
+                .ToListAsync();
         }
 
-        public async Task<Recipe> GetRecipeByIdAsync(int id)
+        public async Task<Recipe> GetByIdAsync(int id)
         {
             return await _context.Recipes
                 .Include(r => r.RecipeIngredients)
@@ -42,7 +40,28 @@ namespace RecipeBook.Api.Services
                 .FirstOrDefaultAsync(r => r.Id == id);
         }
 
-        public async Task<Recipe> UpdateRecipeAsync(int id, Recipe recipe)
+        public async Task<Recipe> CreateAsync(RecipeCreateDto model)
+        {
+            var recipe = new Recipe
+            {
+                Name = model.Name,
+                Description = model.Description,
+                RecipeIngredients = model.RecipeIngredients.Select(item => new RecipeIngredient
+                {
+                    IngredientId = item.IngredientId,
+                    Quantity = item.Quantity,
+                    Unit = item.Unit
+                }).ToList()
+            };
+
+            _context.Recipes.Add(recipe);
+            await _context.SaveChangesAsync();
+
+            return recipe;
+        }
+
+
+        public async Task<Recipe> UpdateAsync(int id, Recipe recipe)
         {
             var existingRecipe = await _context.Recipes
                 .Include(r => r.RecipeIngredients)
@@ -57,6 +76,16 @@ namespace RecipeBook.Api.Services
             existingRecipe.RecipeIngredients = recipe.RecipeIngredients;
             await _context.SaveChangesAsync();
             return recipe;
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var recipe = await _context.Recipes.FindAsync(id);
+            if (recipe == null)
+                return false;
+
+            _context.Recipes.Remove(recipe);
+            return await _context.SaveChangesAsync() > 0;
         }
     }
 }

@@ -10,69 +10,36 @@ namespace RecipeBook.Api.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> userManager;
-        private readonly ITokenService tokenService;
+        private readonly IAuthService authService;
 
-        public AuthController(UserManager<IdentityUser> userManager, ITokenService tokenService)
+        public AuthController (IAuthService _authService)
         {
-            this.userManager = userManager;
-            this.tokenService = tokenService;
+            authService = _authService;
         }
 
-
-        [HttpPost]
-        [Route("Register")]
+        [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequestDto registerRequestDto)
         {
-            var identityUser = new IdentityUser
+            var result = await authService.RegisterAsync(registerRequestDto);
+            if (result.Succeeded)
             {
-                UserName = registerRequestDto.Username,
-                Email = registerRequestDto.Username
-            };
-
-            var identityResult = await userManager.CreateAsync(identityUser, registerRequestDto.Password);
-
-            if (identityResult.Succeeded)
-            {
-                if (registerRequestDto.Roles != null && registerRequestDto.Roles.Any())
-                {
-                    identityResult = await userManager.AddToRolesAsync(identityUser, registerRequestDto.Roles);
-                    if (identityResult.Succeeded)
-                    {
-                        return Ok("User registered");
-                    }
-                }
+                return Ok("User registered successfully.");
             }
-            return BadRequest("Wrong");
+            return BadRequest(result.Errors);
         }
 
-        [HttpPost]
-        [Route("Login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequestDto) 
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequestDto)
         {
-            var user = await userManager.FindByEmailAsync(loginRequestDto.Username);
-
-            if (user != null)
+            try
             {
-                var checkPasswordResult = await userManager.CheckPasswordAsync(user, loginRequestDto.Password);
-                if (checkPasswordResult)
-                {
-                    var roles = await userManager.GetRolesAsync(user);
-
-                    if (roles != null)
-                    {
-                        var jwtToken = tokenService.CreateJWTToken(user, roles.ToList());
-
-                        var response = new LoginResponseDto
-                        {
-                            JwtToken = jwtToken
-                        };
-                        return Ok(response);
-                    }
-                    
-                }
+                var response = await authService.LoginAsync(loginRequestDto);
+                return Ok(response);
             }
-            return BadRequest("Username or password wrong");
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
     }

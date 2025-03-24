@@ -5,34 +5,50 @@ using RecipeBook.Api.Services;
 using RecipeBook.Api.Entities;
 using System.Security.Claims;
 using RecipeBook.Api.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace RecipeBook.Api.Controllers
 {
+    [Authorize]
+    [Route("api/[controller]")]
+    [ApiController]
     public class UserIngredientsController : ControllerBase
     {
         private readonly IUserIngredientService _userIngredientService;
-        private readonly IAuthService _authService;
 
-        public UserIngredientsController(IUserIngredientService userIngredientService, IAuthService authService)
+        public UserIngredientsController(IUserIngredientService userIngredientService)
         {
             _userIngredientService = userIngredientService;
-            _authService = authService;
         }
 
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var userId = _authService.GetCurrentUserId();
-            var userIngredients = await _userIngredientService.GetUserIngredientsAsync(userId);
-            return Ok(userIngredients);
+            var result = await _userIngredientService.GetAllAsync();
+            return Ok(result);
         }
 
         [HttpPost]
-
         public async Task<IActionResult> Post(UserIngredientCreateDto userIngredientCreateDto)
         {
-            var userIngredient = await _userIngredientService.CreateUserIngredientAsync(userIngredientCreateDto);
-            return Ok(userIngredient);
+            var result = await _userIngredientService.CreateAsync(userIngredientCreateDto);
+            return Ok(result);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Put(int id, [FromBody] UserIngredient userIngredient)
+        {
+            string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await _userIngredientService.UpdateAsync(id, userIngredient, userId);
+            return Ok(result);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var success = await _userIngredientService.DeleteAsync(id, userId);
+            return success ? NoContent() : NotFound();
         }
     }
 }

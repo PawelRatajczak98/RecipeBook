@@ -5,56 +5,62 @@ namespace RecipeBook.Api.Services
 {
     public interface IIngredientService
     {
-        Task<List<Ingredient>> GetAllIngredientsAsync();
-        Task<Ingredient> CreateIngredientAsync(Ingredient ingredient);
-        Task<Ingredient> UpdateIngredientAsync(int id, Ingredient ingredient);
-        Task<bool> DeleteIngredientAsync(int id);
+        Task<IEnumerable<Ingredient>> GetAllAsync();
+        Task<Ingredient> GetByIdAsync(int id);
+        Task<Ingredient> CreateAsync(Ingredient ingredient);
+        Task<Ingredient> UpdateAsync(int id, Ingredient ingredient);
+        Task<bool> DeleteAsync(int id);
     }
     public class IngredientService : IIngredientService
     {
-        private readonly AppDbContext _appDbContext;
+        private readonly AppDbContext _context;
 
         public IngredientService(AppDbContext appDbContext)
         {
-            _appDbContext = appDbContext;
+            _context = appDbContext;
         }
 
-        public async Task<List<Ingredient>> GetAllIngredientsAsync()
+        public async Task<IEnumerable<Ingredient>> GetAllAsync()
         {
-            return await _appDbContext.Ingredients.ToListAsync();
+            return await _context.Ingredients.ToListAsync();
         }
 
-        public async Task<Ingredient> CreateIngredientAsync(Ingredient ingredient)
+        public async Task<Ingredient> GetByIdAsync(int id)
+        {
+            return await _context.Ingredients.FindAsync(id);
+        }
+
+        public async Task<Ingredient> CreateAsync(Ingredient ingredient)
         {
             if (ingredient == null) 
             {
                 throw new Exception("Empty Ingredient");
             }
-            if (_appDbContext.Ingredients.Any( i => i.Name == ingredient.Name))
+            if (_context.Ingredients.Any( i => i.Name == ingredient.Name))
             {
                 throw new Exception("Item already in db");
             }
                
-            _appDbContext.Ingredients.Add(ingredient);
-            _appDbContext.SaveChangesAsync();
+            _context.Ingredients.Add(ingredient);
+            await _context.SaveChangesAsync();
             return ingredient;
         }
 
-        public async Task<Ingredient> UpdateIngredientAsync(int id, Ingredient ingredient)
+        public async Task<Ingredient> UpdateAsync(int id, Ingredient ingredient)
         {
-            var entity = await _appDbContext.Ingredients.FindAsync(id);
+            var entity = await _context.Ingredients.FindAsync(id);
             if (entity == null) return null;
             entity.Description = ingredient.Description;
-            await _appDbContext.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             return entity;
         }
 
-        public async Task<bool> DeleteIngredientAsync(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
-            var entity = await _appDbContext.Ingredients.FindAsync(id);
+            var entity = await _context.Ingredients.FindAsync(id);
             if (entity == null) return false;
-            _appDbContext.Ingredients.Remove(entity);
-            await _appDbContext.SaveChangesAsync();
+            _context.Ingredients.Remove(entity);
+            await _context.SaveChangesAsync();
             return true;
         }
 

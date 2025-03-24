@@ -6,10 +6,11 @@ namespace RecipeBook.Api.Services
 {
     public interface IUserIngredientService
     {
-        Task<List<UserIngredient>> GetUserIngredientsAsync(string userId);
-        Task<UserIngredient> UpdateUserIngredientAsync(int id, UserIngredient updatedUserIngredient, string userId);
-        Task<bool> DeleteUserIngredientAsync(int id, string userId);
-        Task<UserIngredient> CreateUserIngredientAsync(UserIngredientCreateDto userIngredientCreateDto);
+        Task<List<UserIngredient>> GetAllAsync();
+        Task<UserIngredient> GetIngredientById(int id, string userId);
+        Task<UserIngredient> UpdateAsync(int id, UserIngredient updatedUserIngredient, string userId);
+        Task<bool> DeleteAsync(int id, string userId);
+        Task<UserIngredient> CreateAsync(UserIngredientCreateDto userIngredientCreateDto);
     }
     public class UserIngredientService : IUserIngredientService
     {
@@ -22,27 +23,33 @@ namespace RecipeBook.Api.Services
             _authService = authService;
         }
 
-        public async Task<List<UserIngredient>> GetUserIngredientsAsync(string userId)
+        public async Task<List<UserIngredient>> GetAllAsync()
         {
+            var userId = _authService.GetCurrentUserId();
             return await _context.UserIngredients
                 .Where(ui => ui.UserId == userId)
                 .Include(ui => ui.Ingredient)
                 .ToListAsync();
         }
 
+        public async Task<UserIngredient> GetIngredientById(int ingredientId, string userId)
+        {
+            return await _context.UserIngredients
+                .Include(ui => ui.Ingredient)
+                .FirstOrDefaultAsync(ui => ui.UserId == userId && ui.IngredientId == ingredientId);
+        }
 
-        public async Task<UserIngredient> UpdateUserIngredientAsync(int id, UserIngredient updatedUserIngredient, string userId)
+        public async Task<UserIngredient> UpdateAsync(int id, UserIngredient updatedUserIngredient, string userId)
         {
             var userIngredient = await _context.UserIngredients.FindAsync(id);
             if (userIngredient == null || userIngredient.UserId != userId)
                 return null;
-            userIngredient.IngredientId = updatedUserIngredient.IngredientId;
             userIngredient.Quantity = updatedUserIngredient.Quantity;
             await _context.SaveChangesAsync();
             return userIngredient;
         }
 
-        public async Task<bool> DeleteUserIngredientAsync(int id, string userId)
+        public async Task<bool> DeleteAsync(int id, string userId)
         {
             var userIngredient = await _context.UserIngredients.FindAsync(id);
             if (userIngredient == null || userIngredient.UserId != userId)
@@ -52,7 +59,7 @@ namespace RecipeBook.Api.Services
             return true;
         }
 
-        public async Task<UserIngredient> CreateUserIngredientAsync(UserIngredientCreateDto userIngredientCreateDto)
+        public async Task<UserIngredient> CreateAsync(UserIngredientCreateDto userIngredientCreateDto)
         {
             var currentUser = await _authService.GetCurrentUserAsync();
             if(currentUser == null)
