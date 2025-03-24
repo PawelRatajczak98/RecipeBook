@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RecipeBook.Api.Entities;
+using RecipeBook.Api.Models;
 
 namespace RecipeBook.Api.Controllers
 {
@@ -41,46 +42,19 @@ namespace RecipeBook.Api.Controllers
             return ingredient;
         }
 
-        // PUT: api/Ingredients/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutIngredient(int id, Ingredient ingredient)
-        {
-            if (id != ingredient.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(ingredient).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!IngredientExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
 
         // POST: api/Ingredients
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Ingredient>> PostIngredient(Ingredient ingredient)
+        public async Task<IActionResult> PostIngredient(IngredientCreateDto ingredientCreateDto)
         {
+            var ingredient = new Ingredient();
+            ingredient.Name = ingredientCreateDto.Name;
+            ingredient.Description = ingredientCreateDto.Description;
             _context.Ingredients.Add(ingredient);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetIngredient", new { id = ingredient.Id }, ingredient);
+            return Ok();
         }
 
         // DELETE: api/Ingredients/5
