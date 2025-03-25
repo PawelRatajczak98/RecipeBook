@@ -44,7 +44,7 @@ namespace RecipeBook.Api.Services
 
             return identityResult;
         }
-
+        
         public async Task<LoginResponseDto> LoginAsync(LoginRequestDto loginRequestDto)
         {
             var user = await userManager.FindByEmailAsync(loginRequestDto.Username);
