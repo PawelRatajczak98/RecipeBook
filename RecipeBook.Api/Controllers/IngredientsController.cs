@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RecipeBook.Api.Entities;
 using RecipeBook.Api.Services;
 using System.Threading.Tasks;
 
 namespace RecipeBook.Api.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class IngredientController : ControllerBase
