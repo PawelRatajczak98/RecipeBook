@@ -31,15 +31,8 @@ namespace RecipeBook.Api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequestDto)
         {
-            try
-            {
                 var response = await authService.LoginAsync(loginRequestDto);
                 return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
         }
 
     }

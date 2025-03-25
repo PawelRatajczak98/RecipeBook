@@ -44,22 +44,5 @@ namespace RecipeBook.Api.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public static string GetUserIdFromToken(string token)
-        {
-            if (string.IsNullOrEmpty(token))
-                throw new ArgumentException("Token cannot be null or empty", nameof(token));
-
-            var tokenHandler = new JwtSecurityTokenHandler();
-
-            var jwtToken = tokenHandler.ReadJwtToken(token);
-            if (jwtToken == null)
-                throw new Exception("Invalid JWT token");
-
-            var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-                throw new Exception("User identifier not found in token");
-
-            return userIdClaim.Value;
-        }
     }
 }

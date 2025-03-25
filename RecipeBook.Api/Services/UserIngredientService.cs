@@ -17,14 +17,12 @@ namespace RecipeBook.Api.Services
         private readonly AppDbContext _context;
         private readonly IAuthService _authService;
         private readonly IUserContextService _userContextService;
-        private readonly ITokenService _tokenService;
 
-        public UserIngredientService(AppDbContext context, IAuthService authService, IUserContextService userContextService, ITokenService tokenService)
+        public UserIngredientService(AppDbContext context, IAuthService authService, IUserContextService userContextService)
         {
              _context = context;
             _authService = authService;
             _userContextService = userContextService;
-            _tokenService = tokenService;
         }
 
         public async Task<List<UserIngredient>> GetAllAsync()
