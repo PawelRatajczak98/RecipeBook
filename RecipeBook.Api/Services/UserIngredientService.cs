@@ -16,11 +16,15 @@ namespace RecipeBook.Api.Services
     {
         private readonly AppDbContext _context;
         private readonly IAuthService _authService;
+        private readonly IUserContextService _userContextService;
+        private readonly ITokenService _tokenService;
 
-        public UserIngredientService(AppDbContext context, IAuthService authService)
+        public UserIngredientService(AppDbContext context, IAuthService authService, IUserContextService userContextService, ITokenService tokenService)
         {
              _context = context;
             _authService = authService;
+            _userContextService = userContextService;
+            _tokenService = tokenService;
         }
 
         public async Task<List<UserIngredient>> GetAllAsync()
@@ -61,8 +65,9 @@ namespace RecipeBook.Api.Services
 
         public async Task<UserIngredient> CreateAsync(UserIngredientCreateDto userIngredientCreateDto)
         {
-            var currentUser = await _authService.GetCurrentUserAsync();
-            if(currentUser == null)
+            var currentUserId = _userContextService.GetUserId;
+
+            if (currentUserId == null)
             {
                 throw new Exception("User not logged in.");
             }
@@ -75,7 +80,7 @@ namespace RecipeBook.Api.Services
 
             var userIngredient = new UserIngredient
             {
-                UserId = currentUser.Id,
+                UserId = currentUserId,
                 IngredientId = ingredient.Id,
                 Ingredient = ingredient,
                 Quantity = userIngredientCreateDto.Quantity

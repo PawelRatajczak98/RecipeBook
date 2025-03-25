@@ -60,6 +60,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IIngredientService, IngredientService>();
 builder.Services.AddScoped<IRecipeService, RecipeService>();
 builder.Services.AddScoped<IUserIngredientService, UserIngredientService>();
+builder.Services.AddScoped<IUserContextService, UserContextService>();
 
 
 

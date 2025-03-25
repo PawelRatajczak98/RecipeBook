@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace RecipeBook.Api.Controllers
 {
-    [Authorize]
+    
     [Route("api/[controller]")]
     [ApiController]
     public class UserIngredientsController : ControllerBase
