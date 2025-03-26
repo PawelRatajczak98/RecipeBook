@@ -5,7 +5,6 @@ namespace RecipeBook.Api.Models
     public class LoginRequestDto
     {
         [Required]
-        [DataType(DataType.EmailAddress)]
         public string Username { get; set; }
 
         [Required]

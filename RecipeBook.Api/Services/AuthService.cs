@@ -45,7 +45,8 @@ namespace RecipeBook.Api.Services
         
         public async Task<LoginResponseDto> LoginAsync(LoginRequestDto loginRequestDto)
         {
-            var user = await userManager.FindByEmailAsync(loginRequestDto.Username);
+            var normalizedUsername = loginRequestDto.Username.ToLowerInvariant();
+            var user = await userManager.FindByNameAsync(normalizedUsername);
             if (user == null || !await userManager.CheckPasswordAsync(user, loginRequestDto.Password))
             {
                 throw new Exception("Username or password wrong");

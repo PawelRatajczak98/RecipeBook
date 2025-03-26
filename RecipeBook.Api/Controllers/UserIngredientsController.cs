@@ -12,7 +12,7 @@ namespace RecipeBook.Api.Controllers
     
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Writer,Reader")]
+    [Authorize]
     public class UserIngredientsController : ControllerBase
     {
         private readonly IUserIngredientService _userIngredientService;
