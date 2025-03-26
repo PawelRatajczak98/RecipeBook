@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RecipeBook.Api.Data;
+using RecipeBook.Api.DTO;
 using RecipeBook.Api.Entities;
 using RecipeBook.Api.Models;
 
@@ -9,7 +10,7 @@ namespace RecipeBook.Api.Services
     {
         Task<List<UserIngredient>> GetAllAsync();
         Task<UserIngredient> GetIngredientById(int id, string userId);
-        Task<UserIngredient> UpdateAsync(int id, UserIngredient updatedUserIngredient, string userId);
+        Task<UserIngredient> UpdateAsync(UserIngredientUpdateDto updatedUserIngredient);
         Task<bool> DeleteAsync(int id, string userId);
         Task<UserIngredient> CreateAsync(UserIngredientCreateDto userIngredientCreateDto);
     }
@@ -42,10 +43,17 @@ namespace RecipeBook.Api.Services
                 .FirstOrDefaultAsync(ui => ui.UserId == userId && ui.IngredientId == ingredientId);
         }
 
-        public async Task<UserIngredient> UpdateAsync(int id, UserIngredient updatedUserIngredient, string userId)
+        public async Task<UserIngredient> UpdateAsync(UserIngredientUpdateDto updatedUserIngredient)
         {
-            var userIngredient = await _context.UserIngredients.FindAsync(id);
-            if (userIngredient == null || userIngredient.UserId != userId)
+            
+            var userId = _userContextService.GetUserId;
+
+            var userIngredient = await _context.UserIngredients
+                .Include(ui => ui.Ingredient)
+                .FirstOrDefaultAsync(ui => ui.UserId.Equals(userId) 
+                && ui.Ingredient.Name.Equals(updatedUserIngredient.Name));
+
+            if (userIngredient == null)
                 return null;
             userIngredient.Quantity = updatedUserIngredient.Quantity;
             await _context.SaveChangesAsync();
@@ -64,7 +72,7 @@ namespace RecipeBook.Api.Services
 
         public async Task<UserIngredient> CreateAsync(UserIngredientCreateDto userIngredientCreateDto)
         {
-            var currentUserId = _userContextService.GetUserId;
+            var currentUserId = _userContextService.GetUserId();
 
             if (currentUserId == null)
             {

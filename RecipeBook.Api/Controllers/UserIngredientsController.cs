@@ -6,6 +6,7 @@ using RecipeBook.Api.Entities;
 using System.Security.Claims;
 using RecipeBook.Api.Models;
 using Microsoft.AspNetCore.Authorization;
+using RecipeBook.Api.DTO;
 
 namespace RecipeBook.Api.Controllers
 {
@@ -37,10 +38,10 @@ namespace RecipeBook.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] UserIngredient userIngredient)
+        public async Task<IActionResult> Put(int id, [FromBody] UserIngredientUpdateDto userIngredient)
         {
             string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var result = await _userIngredientService.UpdateAsync(id, userIngredient, userId);
+            var result = await _userIngredientService.UpdateAsync(userIngredient);
             return Ok(result);
         }
 
