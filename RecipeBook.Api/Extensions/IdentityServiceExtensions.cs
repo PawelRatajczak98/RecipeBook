@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using RecipeBook.Api.Data;
 using RecipeBook.Api.Entities;
 using System.Text;
 
@@ -28,15 +29,14 @@ namespace RecipeBook.Api.Extensions
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
+                    var tokenKey = config["Jwt:Key"] ?? throw new Exception("TokenKey not found");
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        ValidIssuer = config["Jwt:Issuer"],
-                        ValidAudience = config["Jwt:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]))
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKey))
                     };
 
                     options.Events = new JwtBearerEvents
@@ -53,6 +53,9 @@ namespace RecipeBook.Api.Extensions
                         }
                     };
                 });
+            services.AddAuthorizationBuilder()
+                .AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"))
+                .AddPolicy("RequireModeratorRole", policy => policy.RequireRole("Admin","Moderator"));
 
             return services;
         }

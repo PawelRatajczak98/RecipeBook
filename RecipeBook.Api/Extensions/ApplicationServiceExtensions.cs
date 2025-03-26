@@ -2,9 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
-using RecipeBook.Api.Entities;
 using RecipeBook.Api.Services;
 using Microsoft.EntityFrameworkCore;
+using RecipeBook.Api.Data;
 
 namespace RecipeBook.Api.Extensions
 {

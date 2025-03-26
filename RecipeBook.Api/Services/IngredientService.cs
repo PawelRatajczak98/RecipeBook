@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using RecipeBook.Api.Data;
 using RecipeBook.Api.Entities;
 
 namespace RecipeBook.Api.Services

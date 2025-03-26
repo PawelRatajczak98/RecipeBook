@@ -3,6 +3,7 @@ using RecipeBook.Api.Entities;
 using RecipeBook.Api.Models;
 using AutoMapper;
 using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
 
 namespace RecipeBook.Api.Services
 {
@@ -34,26 +35,29 @@ namespace RecipeBook.Api.Services
 
         public async Task<IdentityResult> RegisterAsync(RegisterRequestDto registerRequestDto)
         {
-            var user = new AppUser();
-
-            user.UserName = registerRequestDto.Username.ToLower();
+            var user = new AppUser
+            {
+                UserName = registerRequestDto.Username,
+                PasswordHash = registerRequestDto.Password,
+            };
             
             var result = await userManager.CreateAsync(user, registerRequestDto.Password);
-
+            
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(user, "Member");
+            }
             return result;
         }
         
         public async Task<LoginResponseDto> LoginAsync(LoginRequestDto loginRequestDto)
         {
-            var normalizedUsername = loginRequestDto.Username.ToLowerInvariant();
-            var user = await userManager.FindByNameAsync(normalizedUsername);
+            var user = await userManager.FindByNameAsync(loginRequestDto.Username);
             if (user == null || !await userManager.CheckPasswordAsync(user, loginRequestDto.Password))
             {
                 throw new Exception("Username or password wrong");
             }
-
-            var roles = await userManager.GetRolesAsync(user);
-            var jwtToken = tokenService.CreateJWTToken(user, roles.ToList());
+            string jwtToken = await tokenService.CreateJWTToken(user);
 
             return new LoginResponseDto { JwtToken = jwtToken };
         }

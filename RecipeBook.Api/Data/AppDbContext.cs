@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-namespace RecipeBook.Api.Entities
+using RecipeBook.Api.Entities;
+namespace RecipeBook.Api.Data
 {
     public class AppDbContext : IdentityDbContext<AppUser>
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) 
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
 
@@ -17,7 +18,7 @@ namespace RecipeBook.Api.Entities
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            
+
 
             modelBuilder.Entity<AppUser>()
             .HasMany(ur => ur.UserRoles)
@@ -52,12 +53,12 @@ namespace RecipeBook.Api.Entities
                 .HasOne<AppUser>()
                 .WithMany()
                 .HasForeignKey(ui => ui.UserId);
-          
+
             modelBuilder.Entity<UserIngredient>()
                 .HasOne(ui => ui.Ingredient)
-                .WithMany() 
+                .WithMany()
                 .HasForeignKey(ui => ui.IngredientId);
-                
+
         }
 
     }
