@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using RecipeBook.Api.Entities;
 using RecipeBook.Api.Models;
+using AutoMapper;
 using System.Security.Claims;
 
 namespace RecipeBook.Api.Services
@@ -14,35 +16,31 @@ namespace RecipeBook.Api.Services
 
     public class AuthService : IAuthService
     {
-        private readonly UserManager<IdentityUser> userManager;
+        private readonly UserManager<AppUser> userManager;
         private readonly ITokenService tokenService;
         private readonly IHttpContextAccessor httpContextAccessor;
+        private readonly IMapper mapper;
 
-        public AuthService(UserManager<IdentityUser> userManager,
+        public AuthService(UserManager<AppUser> userManager,
                            ITokenService tokenService,
-                           IHttpContextAccessor httpContextAccessor)
+                           IHttpContextAccessor httpContextAccessor,
+                           IMapper mapper)
         {
             this.userManager = userManager;
             this.tokenService = tokenService;
             this.httpContextAccessor = httpContextAccessor;
+            this.mapper=mapper;
         }
 
         public async Task<IdentityResult> RegisterAsync(RegisterRequestDto registerRequestDto)
         {
-            var identityUser = new IdentityUser
-            {
-                UserName = registerRequestDto.Username,
-                Email = registerRequestDto.Username
-            };
+            var user = new AppUser();
 
-            var identityResult = await userManager.CreateAsync(identityUser, registerRequestDto.Password);
+            user.UserName = registerRequestDto.Username.ToLower();
+            
+            var result = await userManager.CreateAsync(user, registerRequestDto.Password);
 
-            if (identityResult.Succeeded && registerRequestDto.Roles != null && registerRequestDto.Roles.Any())
-            {
-                identityResult = await userManager.AddToRolesAsync(identityUser, registerRequestDto.Roles);
-            }
-
-            return identityResult;
+            return result;
         }
         
         public async Task<LoginResponseDto> LoginAsync(LoginRequestDto loginRequestDto)

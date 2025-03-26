@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace RecipeBook.Api.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class IngredientController : ControllerBase

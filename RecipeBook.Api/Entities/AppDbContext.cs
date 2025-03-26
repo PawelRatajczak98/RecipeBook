@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 namespace RecipeBook.Api.Entities
 {
-    public class AppDbContext : IdentityDbContext<IdentityUser>
+    public class AppDbContext : IdentityDbContext<AppUser>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) 
         {
@@ -17,28 +17,19 @@ namespace RecipeBook.Api.Entities
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            var readerRoleId = "c6983803-d486-4f59-8439-b16a2f4c7fa2";
-            var writerRoleId = "e722bf02-fa75-4487-831d-7c2df7bbd5d1";
+            
 
-            var roles = new List<IdentityRole>
-            {
-                new IdentityRole
-                {
-                    Id = readerRoleId,
-                    ConcurrencyStamp = readerRoleId,
-                    Name = "Reader",
-                    NormalizedName = "Reader".ToUpper()
-                },
-                new IdentityRole
-                {
-                    Id=writerRoleId,
-                    ConcurrencyStamp=writerRoleId,
-                    Name = "Writer",
-                    NormalizedName = "Writer".ToUpper(),
-                }
-            };
+            modelBuilder.Entity<AppUser>()
+            .HasMany(ur => ur.UserRoles)
+            .WithOne(u => u.User)
+            .HasForeignKey(ur => ur.UserId)
+            .IsRequired();
 
-            modelBuilder.Entity<IdentityRole>().HasData(roles);
+            modelBuilder.Entity<AppRole>()
+                .HasMany(ur => ur.UserRoles)
+                .WithOne(u => u.Role)
+                .HasForeignKey(ur => ur.RoleId)
+                .IsRequired();
 
 
             modelBuilder.Entity<RecipeIngredient>()
@@ -58,7 +49,7 @@ namespace RecipeBook.Api.Entities
                 .HasKey(ui => new { ui.UserId, ui.IngredientId });
 
             modelBuilder.Entity<UserIngredient>()
-                .HasOne<IdentityUser>()
+                .HasOne<AppUser>()
                 .WithMany()
                 .HasForeignKey(ui => ui.UserId);
           

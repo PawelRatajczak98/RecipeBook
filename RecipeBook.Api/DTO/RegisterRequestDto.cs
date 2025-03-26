@@ -5,15 +5,12 @@ namespace RecipeBook.Api.Models
     public class RegisterRequestDto
     {
         [Required]
-        [DataType(DataType.EmailAddress)]
-        public string Username { get; set; }
+        public string Username { get; set; } = string.Empty;
 
         [Required]
         [DataType(DataType.Password)]
-        public string Password { get; set; }
-
-        public string[] Roles { get; set; }
-
+        [StringLength(16,MinimumLength = 4)]
+        public string Password { get; set; } = string.Empty;
 
     }
 }
