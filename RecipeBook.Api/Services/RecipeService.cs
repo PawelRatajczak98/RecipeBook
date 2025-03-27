@@ -48,19 +48,37 @@ namespace RecipeBook.Api.Services
 
         public async Task<Recipe> CreateAsync(RecipeCreateDto dto)
         {
+            if (dto == null)
+            {
+                throw new Exception("Empty Recipe");
+            }
+            
+            var recipeIngredients = new List<RecipeIngredient>();
+            
+            foreach (var item in dto.RecipeIngredients)
+            {
+                var ingredient = await _context.Ingredients.FindAsync(item.IngredientId);
+                if (ingredient == null)
+                {
+                    throw new Exception("Ingredient not found");
+                }
+
+                var recipeIngredient = new RecipeIngredient
+                {
+                    IngredientId = item.IngredientId,
+                    Quantity = item.Quantity,
+                    Unit = item.Unit
+                };
+                recipeIngredients.Add(recipeIngredient);
+            }
             var recipe = new Recipe
             {
                 Name = dto.Name,
                 Description = dto.Description,
-                RecipeIngredients = dto.RecipeIngredients.Select(item => new RecipeIngredient
-                {
-                    IngredientId = item.IngredientId,
-                    Quantity = item.Quantity,
-                    MeasurementUnit = item.MeasurementUnit
-                }).ToList()
+                RecipeIngredients = recipeIngredients
             };
 
-            _context.Recipes.Add(recipe);
+            await _context.Recipes.AddAsync(recipe);
             await _context.SaveChangesAsync();
 
             return recipe;

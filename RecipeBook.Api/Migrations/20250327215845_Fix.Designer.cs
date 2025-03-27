@@ -12,8 +12,8 @@ using RecipeBook.Api.Data;
 namespace RecipeBook.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250327184039_UpdateCollectionAddedToNavigation")]
-    partial class UpdateCollectionAddedToNavigation
+    [Migration("20250327215845_Fix")]
+    partial class Fix
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -297,12 +297,12 @@ namespace RecipeBook.Api.Migrations
                     b.Property<int>("IngredientId")
                         .HasColumnType("int");
 
+                    b.Property<double>("Quantity")
+                        .HasColumnType("float");
+
                     b.Property<string>("Unit")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("Quantity")
-                        .HasColumnType("float");
 
                     b.HasKey("RecipeId", "IngredientId");
 
@@ -413,18 +413,20 @@ namespace RecipeBook.Api.Migrations
             modelBuilder.Entity("RecipeBook.Api.Entities.UserIngredient", b =>
                 {
                     b.HasOne("RecipeBook.Api.Entities.Ingredient", "Ingredient")
-                        .WithMany()
+                        .WithMany("UserIngredients")
                         .HasForeignKey("IngredientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RecipeBook.Api.Entities.AppUser", null)
-                        .WithMany()
+                    b.HasOne("RecipeBook.Api.Entities.AppUser", "User")
+                        .WithMany("UserIngredients")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Ingredient");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("RecipeBook.Api.Entities.AppUserRole", b =>
@@ -448,12 +450,16 @@ namespace RecipeBook.Api.Migrations
 
             modelBuilder.Entity("RecipeBook.Api.Entities.AppUser", b =>
                 {
+                    b.Navigation("UserIngredients");
+
                     b.Navigation("UserRoles");
                 });
 
             modelBuilder.Entity("RecipeBook.Api.Entities.Ingredient", b =>
                 {
                     b.Navigation("RecipeIngredients");
+
+                    b.Navigation("UserIngredients");
                 });
 
             modelBuilder.Entity("RecipeBook.Api.Entities.Recipe", b =>

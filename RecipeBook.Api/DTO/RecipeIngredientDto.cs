@@ -4,6 +4,6 @@
     {
         public int IngredientId { get; set; }
         public double Quantity { get; set; }
-        public string MeasurementUnit { get; set; }
+        public string Unit { get; set; }
     }
 }
