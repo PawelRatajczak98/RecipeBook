@@ -6,6 +6,7 @@ using RecipeBook.Api.Entities;
 
 namespace RecipeBook.Api.Controllers
 {
+    [Authorize(Policy = "RequireAdminRole")]
     public class AdminController: ControllerBase
     {
         private readonly IAdminService _adminService;
@@ -16,7 +17,7 @@ namespace RecipeBook.Api.Controllers
             _userManager = userManager;
         }
 
-        [Authorize(Policy = "RequireAdminRole")]
+        
         [HttpGet("users-with-roles")]
         public async Task<ActionResult> GetUsersWithRoles()
         {
@@ -24,7 +25,7 @@ namespace RecipeBook.Api.Controllers
             return Ok(users);
         }
 
-        [Authorize(Policy = "RequireAdminRole")]
+        
         [HttpPost("edit-roles/{username}")]
         public async Task<ActionResult> EditRoles(string username, string roles)
         {

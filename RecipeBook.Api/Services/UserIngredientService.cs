@@ -29,7 +29,7 @@ namespace RecipeBook.Api.Services
 
         public async Task<List<UserIngredient>> GetAllAsync()
         {
-            var userId = _authService.GetCurrentUserId();
+            var userId = _userContextService.GetUserId();
             return await _context.UserIngredients
                 .Where(ui => ui.UserId == userId)
                 .Include(ui => ui.Ingredient)

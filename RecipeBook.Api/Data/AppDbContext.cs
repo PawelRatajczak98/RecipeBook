@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using RecipeBook.Api.Entities;
+using System.Reflection.Emit;
 namespace RecipeBook.Api.Data
 {
     public class AppDbContext : IdentityDbContext<AppUser>
@@ -19,19 +20,25 @@ namespace RecipeBook.Api.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<AppUser>()
+                .Property(u => u.Budget)
+                .HasColumnType("decimal(18,2)");
 
             modelBuilder.Entity<AppUser>()
-            .HasMany(ur => ur.UserRoles)
-            .WithOne(u => u.User)
-            .HasForeignKey(ur => ur.UserId)
-            .IsRequired();
+                .HasMany(ur => ur.UserRoles)
+                .WithOne(u => u.User)
+                .HasForeignKey(ur => ur.UserId)
+                .IsRequired();
 
             modelBuilder.Entity<AppRole>()
                 .HasMany(ur => ur.UserRoles)
                 .WithOne(u => u.Role)
                 .HasForeignKey(ur => ur.RoleId)
                 .IsRequired();
-
+            
+            modelBuilder.Entity<Ingredient>()
+                .Property(i => i.PriceFor100Grams)
+                .HasColumnType("decimal(18,2)");
 
             modelBuilder.Entity<RecipeIngredient>()
                 .HasKey(ri => new { ri.RecipeId, ri.IngredientId });
@@ -48,15 +55,19 @@ namespace RecipeBook.Api.Data
 
             modelBuilder.Entity<UserIngredient>()
                 .HasKey(ui => new { ui.UserId, ui.IngredientId });
+            
+            modelBuilder.Entity<UserIngredient>()
+                .Property(ui => ui.Quantity)
+                .HasColumnType("decimal(18,2)");
 
             modelBuilder.Entity<UserIngredient>()
-                .HasOne<AppUser>()
-                .WithMany()
+                .HasOne(ui=>ui.User)
+                .WithMany(u=>u.UserIngredients)
                 .HasForeignKey(ui => ui.UserId);
 
             modelBuilder.Entity<UserIngredient>()
                 .HasOne(ui => ui.Ingredient)
-                .WithMany()
+                .WithMany(i=>i.UserIngredients)
                 .HasForeignKey(ui => ui.IngredientId);
 
         }

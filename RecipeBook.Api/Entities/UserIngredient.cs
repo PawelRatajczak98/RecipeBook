@@ -10,5 +10,6 @@ namespace RecipeBook.Api.Entities
         public int IngredientId { get; set; }
         public Ingredient Ingredient { get; set; }
         public decimal Quantity { get; set; }
+        public AppUser User { get; set; }
     }
 }

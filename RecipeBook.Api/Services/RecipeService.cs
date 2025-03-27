@@ -12,17 +12,22 @@ namespace RecipeBook.Api.Services
         Task<Recipe> CreateAsync(RecipeCreateDto recipeCreateDto);
         Task<Recipe> UpdateAsync(int id, Recipe recipe);
         Task<bool> DeleteAsync(int id);
+        Task<decimal> CalculateRecipeCostAsync(int recipeId);
+        Task<List<Recipe>> GetRecipesWithingBudget();
+        Task<List<Recipe>> GetRecipesUserCanPrepareAsync();
     }
 
     public class RecipeService : IRecipeService
     {
         private readonly AppDbContext _context;
         private readonly IAuthService _authService;
+        private readonly IUserContextService _userContextService;
 
-        public RecipeService(AppDbContext context, IAuthService authService)
+        public RecipeService(AppDbContext context, IAuthService authService, IUserContextService userContextService)
         {
             _context = context;
             _authService = authService;
+            _userContextService = userContextService;
         }
 
         public async Task<IEnumerable<Recipe>> GetAllAsync()
@@ -41,17 +46,17 @@ namespace RecipeBook.Api.Services
                 .FirstOrDefaultAsync(r => r.Id == id);
         }
 
-        public async Task<Recipe> CreateAsync(RecipeCreateDto model)
+        public async Task<Recipe> CreateAsync(RecipeCreateDto dto)
         {
             var recipe = new Recipe
             {
-                Name = model.Name,
-                Description = model.Description,
-                RecipeIngredients = model.RecipeIngredients.Select(item => new RecipeIngredient
+                Name = dto.Name,
+                Description = dto.Description,
+                RecipeIngredients = dto.RecipeIngredients.Select(item => new RecipeIngredient
                 {
                     IngredientId = item.IngredientId,
                     Quantity = item.Quantity,
-                    MeasurementUnit = item.Unit
+                    MeasurementUnit = item.MeasurementUnit
                 }).ToList()
             };
 
@@ -67,6 +72,7 @@ namespace RecipeBook.Api.Services
             var existingRecipe = await _context.Recipes
                 .Include(r => r.RecipeIngredients)
                 .FirstOrDefaultAsync(r => r.Id ==id);
+            
             if(existingRecipe == null)
             {
                 throw new Exception("Not found");
@@ -89,7 +95,7 @@ namespace RecipeBook.Api.Services
             return await _context.SaveChangesAsync() > 0;
         }
 
-        ///Dodatkowe funkcje, rano check
+        
         public async Task<decimal> CalculateRecipeCostAsync(int recipeId)
         {
             var totalCost = await _context.RecipeIngredients
@@ -98,18 +104,31 @@ namespace RecipeBook.Api.Services
                 .SumAsync(ri => ri.Ingredient.PriceFor100Grams * (decimal)ri.Quantity);
             return totalCost;
         }
-        ///
-        public async Task<List<Recipe>> GetRecipesWithingBudget(decimal budgetPrice)
+
+        public async Task<List<Recipe>> GetRecipesWithingBudget()
         {
-            var recipesWithinBudget = await _context.Recipes
+            var userId = _userContextService.GetUserId();
+            var user = await _context.Users.FindAsync(userId);
+            
+                if (user == null)
+                {
+                    throw new Exception("User not found");
+                }
+
+                if (user.Budget == null)
+                {
+                    throw new Exception("User budget not set");
+                }
+                var recipesWithinBudget = await _context.Recipes
                 .Where(r => r.RecipeIngredients
-                .Sum(ri => ri.Ingredient.PriceFor100Grams * (decimal)ri.Quantity) <= budgetPrice)
+                .Sum(ri => ri.Ingredient.PriceFor100Grams * (decimal)ri.Quantity) <= user.Budget)
                 .ToListAsync();
             return recipesWithinBudget;
         }
 
-        public async Task<List<Recipe>> GetRecipesUserCanPrepareAsync(string userId)
+        public async Task<List<Recipe>> GetRecipesUserCanPrepareAsync()
         {
+            var userId = _userContextService.GetUserId();
             return await _context.Recipes
                 .Where(r => r.RecipeIngredients
                 .All(ri => _context.UserIngredients
