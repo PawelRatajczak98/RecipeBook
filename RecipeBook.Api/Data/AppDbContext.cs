@@ -43,7 +43,7 @@ namespace RecipeBook.Api.Data
 
             modelBuilder.Entity<RecipeIngredient>()
                 .HasOne(ri => ri.Ingredient)
-                .WithMany()
+                .WithMany(i => i.RecipeIngredients)
                 .HasForeignKey(ri => ri.IngredientId);
 
             modelBuilder.Entity<UserIngredient>()

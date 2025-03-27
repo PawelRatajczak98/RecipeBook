@@ -10,6 +10,6 @@ namespace RecipeBook.Api.Entities
         public int IngredientId { get; set;}
         public Ingredient Ingredient { get; set; }
         public double Quantity { get; set; }
-        public string Unit { get; set; }
+        public string MeasurementUnit { get; set; }       
     }
 }

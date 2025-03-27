@@ -51,7 +51,7 @@ namespace RecipeBook.Api.Services
                 {
                     IngredientId = item.IngredientId,
                     Quantity = item.Quantity,
-                    Unit = item.Unit
+                    MeasurementUnit = item.Unit
                 }).ToList()
             };
 

@@ -294,12 +294,12 @@ namespace RecipeBook.Api.Migrations
                     b.Property<int>("IngredientId")
                         .HasColumnType("int");
 
-                    b.Property<double>("Quantity")
-                        .HasColumnType("float");
-
-                    b.Property<string>("Unit")
+                    b.Property<string>("MeasurementUnit")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("Quantity")
+                        .HasColumnType("float");
 
                     b.HasKey("RecipeId", "IngredientId");
 
@@ -391,7 +391,7 @@ namespace RecipeBook.Api.Migrations
             modelBuilder.Entity("RecipeBook.Api.Entities.RecipeIngredient", b =>
                 {
                     b.HasOne("RecipeBook.Api.Entities.Ingredient", "Ingredient")
-                        .WithMany()
+                        .WithMany("RecipeIngredients")
                         .HasForeignKey("IngredientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -446,6 +446,11 @@ namespace RecipeBook.Api.Migrations
             modelBuilder.Entity("RecipeBook.Api.Entities.AppUser", b =>
                 {
                     b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("RecipeBook.Api.Entities.Ingredient", b =>
+                {
+                    b.Navigation("RecipeIngredients");
                 });
 
             modelBuilder.Entity("RecipeBook.Api.Entities.Recipe", b =>
