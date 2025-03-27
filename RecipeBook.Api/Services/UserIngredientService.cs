@@ -73,7 +73,6 @@ namespace RecipeBook.Api.Services
         public async Task<UserIngredient> CreateAsync(UserIngredientCreateDto userIngredientCreateDto)
         {
             var currentUserId = _userContextService.GetUserId();
-
             if (currentUserId == null)
             {
                 throw new Exception("User not logged in.");
@@ -83,6 +82,13 @@ namespace RecipeBook.Api.Services
             if ( ingredient == null )
             {
                 throw new Exception("Ingredient not exist");
+            }
+            
+            var alreadyExist = await _context.UserIngredients
+                .AnyAsync(ui=>ui.UserId == currentUserId && ui.IngredientId == ingredient.Id);
+            if ( alreadyExist)
+            {
+                throw new Exception("You already have this product.");
             }
 
             var userIngredient = new UserIngredient
@@ -94,8 +100,7 @@ namespace RecipeBook.Api.Services
             };
 
             _context.UserIngredients.Add(userIngredient);
-            await _context.SaveChangesAsync();
-            
+            await _context.SaveChangesAsync();           
             return userIngredient;
         }
     }

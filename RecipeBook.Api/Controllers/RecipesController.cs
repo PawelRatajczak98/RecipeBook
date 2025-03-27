@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RecipeBook.Api.Entities;
 using RecipeBook.Api.Models;
 using RecipeBook.Api.Services;
@@ -17,7 +18,9 @@ namespace RecipeBook.Api.Controllers
             _recipeService = recipeService;
         }
 
+
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Post(RecipeCreateDto recipe)
         {
             var createdRecipe = await _recipeService.CreateAsync(recipe);
@@ -38,7 +41,9 @@ namespace RecipeBook.Api.Controllers
             return Ok(recipe);
         }
 
+        
         [HttpPut("{id}")]
+        [Authorize(Policy = "RequireAdminRole")]
         public async Task<IActionResult> Put(int id, Recipe updatedRecipe)
         {
             var recipe = await _recipeService.UpdateAsync(id, updatedRecipe);
@@ -46,6 +51,7 @@ namespace RecipeBook.Api.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = "RequireAdminRole")]
         public async Task<IActionResult> Delete(int id)
         {
             var deleted = await _recipeService.DeleteAsync(id);

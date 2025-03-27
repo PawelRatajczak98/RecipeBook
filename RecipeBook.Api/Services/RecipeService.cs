@@ -88,5 +88,37 @@ namespace RecipeBook.Api.Services
             _context.Recipes.Remove(recipe);
             return await _context.SaveChangesAsync() > 0;
         }
+
+        ///Dodatkowe funkcje, rano check
+        public async Task<decimal> CalculateRecipeCostAsync(int recipeId)
+        {
+            var totalCost = await _context.RecipeIngredients
+                .Include(ri => ri.Ingredient)
+                .Where(ri => ri.RecipeId == recipeId)
+                .SumAsync(ri => ri.Ingredient.PriceFor100Grams * (decimal)ri.Quantity);
+            return totalCost;
+        }
+        ///
+        public async Task<List<Recipe>> GetRecipesWithingBudget(decimal budgetPrice)
+        {
+            var recipesWithinBudget = await _context.Recipes
+                .Where(r => r.RecipeIngredients
+                .Sum(ri => ri.Ingredient.PriceFor100Grams * (decimal)ri.Quantity) <= budgetPrice)
+                .ToListAsync();
+            return recipesWithinBudget;
+        }
+
+        public async Task<List<Recipe>> GetRecipesUserCanPrepareAsync(string userId)
+        {
+            return await _context.Recipes
+                .Where(r => r.RecipeIngredients
+                .All(ri => _context.UserIngredients
+                .Any(ui => ui.UserId == userId
+                && ui.IngredientId == ri.IngredientId
+                && ui.Quantity >= (decimal)ri.Quantity * 100)))
+                .Include(r => r.RecipeIngredients)
+                .ThenInclude(ri => ri.Ingredient)
+                .ToListAsync();
+        }
     }
 }

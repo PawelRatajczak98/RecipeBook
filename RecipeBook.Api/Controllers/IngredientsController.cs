@@ -39,6 +39,7 @@ namespace RecipeBook.Api.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Policy = "RequireAdminRole")]
         public async Task<IActionResult> Put(int id, Ingredient ingredient)
         {
             var updated = await _ingredientService.UpdateAsync(id,ingredient);
@@ -46,6 +47,7 @@ namespace RecipeBook.Api.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = "RequireAdminRole")]
         public async Task<IActionResult> Delete(int id)
         {
             var deleted = await _ingredientService.DeleteAsync(id);

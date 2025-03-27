@@ -23,10 +23,10 @@ namespace RecipeBook.Api.Services
             if (user.UserName == null) throw new Exception("No username for user");
 
             var claims = new List<Claim>
-        {
+            {
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(ClaimTypes.Name, user.UserName)
-        };
+            };
 
             var roles = await userManager.GetRolesAsync(user);
 
