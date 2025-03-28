@@ -25,6 +25,10 @@ namespace RecipeBook.Api.Data
                 .HasColumnType("decimal(18,2)");
 
             modelBuilder.Entity<AppUser>()
+                .Property(u => u.Budget)
+                .HasDefaultValue(0m);
+
+            modelBuilder.Entity<AppUser>()
                 .HasMany(ur => ur.UserRoles)
                 .WithOne(u => u.User)
                 .HasForeignKey(ur => ur.UserId)

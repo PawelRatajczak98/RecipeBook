@@ -49,7 +49,7 @@ namespace RecipeBook.Api.Services
         public async Task<decimal?> GetBudgetAsync()
         {
             var user = await _context.Users.FindAsync(_userContextService.GetUserId());
-            return user?.Budget;
+            return user.Budget;
         }
 
         

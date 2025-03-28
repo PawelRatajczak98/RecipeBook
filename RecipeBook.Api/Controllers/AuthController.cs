@@ -18,7 +18,7 @@ namespace RecipeBook.Api.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequestDto registerRequestDto)
+        public async Task<IActionResult> Register(RegisterRequestDto registerRequestDto)
         {
             var result = await authService.RegisterAsync(registerRequestDto);
             if (result.Succeeded)
@@ -29,7 +29,7 @@ namespace RecipeBook.Api.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequestDto)
+        public async Task<IActionResult> Login(LoginRequestDto loginRequestDto)
         {
                 var response = await authService.LoginAsync(loginRequestDto);
                 return Ok(response);

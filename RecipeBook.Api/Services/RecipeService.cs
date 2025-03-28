@@ -137,7 +137,10 @@ namespace RecipeBook.Api.Services
                 {
                     throw new Exception("User budget not set");
                 }
-                var recipesWithinBudget = await _context.Recipes
+
+            var recipesWithinBudget = await _context.Recipes
+                .Include(r => r.RecipeIngredients)
+                .ThenInclude(ri => ri.Ingredient)
                 .Where(r => r.RecipeIngredients
                 .Sum(ri => ri.Ingredient.PriceFor100Grams * (decimal)ri.Quantity) <= user.Budget)
                 .ToListAsync();
@@ -152,7 +155,7 @@ namespace RecipeBook.Api.Services
                 .All(ri => _context.UserIngredients
                 .Any(ui => ui.UserId == userId
                 && ui.IngredientId == ri.IngredientId
-                && ui.Quantity >= (decimal)ri.Quantity * 100)))
+                && ui.Quantity >= (decimal)ri.Quantity)))
                 .Include(r => r.RecipeIngredients)
                 .ThenInclude(ri => ri.Ingredient)
                 .ToListAsync();
