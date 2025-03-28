@@ -11,11 +11,13 @@ namespace RecipeBook.Api.Data;
     public static async Task SeedUsers(UserManager<AppUser> userManager, RoleManager<AppRole> roleManager)
     {
         if (await userManager.Users.AnyAsync()) return;
-        var userData = await File.ReadAllTextAsync("Data/UserSeedData.json");
-        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        var users = JsonSerializer.Deserialize<List<AppUser>>(userData, options);
-
-        if (users == null) return;
+        
+        var users = new List<AppUser>
+        {
+            new() {UserName = "Bob", Budget = 1000},
+            new() {UserName = "Michael", Budget = 500},
+            new() {UserName = "LeBron", Budget = 2000},
+        };
 
         var roles = new List<AppRole>
         {
