@@ -5,7 +5,7 @@
 namespace RecipeBook.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class RebuiltApp : Migration
+    public partial class Fix : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

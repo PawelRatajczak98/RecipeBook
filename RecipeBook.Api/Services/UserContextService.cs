@@ -4,8 +4,8 @@ namespace RecipeBook.Api.Services
 {
     public interface IUserContextService
     {
-        ClaimsPrincipal User { get; }
-        string? GetUserId { get; }
+        string? GetUserId();
+        string GetUsername();
     }
 
     public class UserContextService : IUserContextService
@@ -17,9 +17,24 @@ namespace RecipeBook.Api.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public ClaimsPrincipal User => _httpContextAccessor.HttpContext?.User;
+        public string GetUserId()
+        {
+            var result = string.Empty;
+            if (_httpContextAccessor.HttpContext is not null)
+            {
+                result = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            }
+            return result;
+        }
 
-        public string? GetUserId => User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-
+        public string GetUsername()
+        {
+            var result = string.Empty;
+            if (_httpContextAccessor.HttpContext is not null)
+            {
+                result = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.Name);
+            }
+            return result;
+        }
     }
 }

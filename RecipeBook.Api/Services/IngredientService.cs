@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using RecipeBook.Api.Data;
+using RecipeBook.Api.DTO;
 using RecipeBook.Api.Entities;
 
 namespace RecipeBook.Api.Services
@@ -7,7 +9,7 @@ namespace RecipeBook.Api.Services
     {
         Task<IEnumerable<Ingredient>> GetAllAsync();
         Task<Ingredient> GetByIdAsync(int id);
-        Task<Ingredient> CreateAsync(Ingredient ingredient);
+        Task<Ingredient> CreateAsync(IngredientCreateDto dto);
         Task<Ingredient> UpdateAsync(int id, Ingredient ingredient);
         Task<bool> DeleteAsync(int id);
     }
@@ -30,29 +32,35 @@ namespace RecipeBook.Api.Services
             return await _context.Ingredients.FindAsync(id);
         }
 
-        public async Task<Ingredient> CreateAsync(Ingredient ingredient)
+        public async Task<Ingredient> CreateAsync(IngredientCreateDto dto)
         {
-            if (ingredient == null) 
+            if (dto == null)
             {
                 throw new Exception("Empty Ingredient");
             }
-            if (_context.Ingredients.Any( i => i.Name == ingredient.Name))
+            if (_context.Ingredients.Any(i => i.Name == dto.Name))
             {
-                throw new Exception("Item already in db");
+                throw new Exception("Item already created in database");
             }
-               
-            _context.Ingredients.Add(ingredient);
+            var ingredient = new Ingredient
+            {
+                Name = dto.Name,
+                Description = dto.Description,
+                PriceFor100Grams = dto.PriceFor100Grams
+            };
+            await _context.Ingredients.AddAsync(ingredient);
             await _context.SaveChangesAsync();
             return ingredient;
         }
 
-        public async Task<Ingredient> UpdateAsync(int id, Ingredient ingredient)
+        public async Task<Ingredient> UpdateAsync(int id, Ingredient updatedIngredient)
         {
-            var entity = await _context.Ingredients.FindAsync(id);
-            if (entity == null) return null;
-            entity.Description = ingredient.Description;
+            var existingIngredient = await _context.Ingredients.FindAsync(id);
+            if (existingIngredient == null) return null;
+            existingIngredient.Description = updatedIngredient.Description;
+            existingIngredient.PriceFor100Grams = updatedIngredient.PriceFor100Grams;
             await _context.SaveChangesAsync();
-            return entity;
+            return existingIngredient;
         }
 
         public async Task<bool> DeleteAsync(int id)

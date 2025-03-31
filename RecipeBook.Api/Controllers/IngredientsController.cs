@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RecipeBook.Api.DTO;
 using RecipeBook.Api.Entities;
 using RecipeBook.Api.Services;
 using System.Threading.Tasks;
 
 namespace RecipeBook.Api.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class IngredientController : ControllerBase
@@ -33,24 +33,26 @@ namespace RecipeBook.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post(Ingredient ingredient)
+        public async Task<IActionResult> Post(IngredientCreateDto ingredient)
         {
             var createdIngredient = await _ingredientService.CreateAsync(ingredient);
             return Ok(ingredient);
         }
 
         [HttpPut("{id}")]
+        [Authorize(Policy = "RequireAdminRole")]
         public async Task<IActionResult> Put(int id, Ingredient ingredient)
         {
             var updated = await _ingredientService.UpdateAsync(id,ingredient);
-            return NoContent();
+            return Ok(updated);
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = "RequireAdminRole")]
         public async Task<IActionResult> Delete(int id)
         {
             var deleted = await _ingredientService.DeleteAsync(id);
-            return NoContent();
+            return Ok(deleted);
         }
     }
 }
