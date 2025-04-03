@@ -1,15 +1,17 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RecipeBook.Api.Services;
 
 namespace RecipeBook.Api.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class RecipeFeedbacksService : ControllerBase
     {
         private readonly IRecipeFeedbackService _recipeFeedbackService;
-        public RecipeFeedbacksService(IRecipeFeedbackService recipeFeedbackService, IUserContextService userContextService)
+        public RecipeFeedbacksService(IRecipeFeedbackService recipeFeedbackService)
         {
             _recipeFeedbackService = recipeFeedbackService;
         }
@@ -29,6 +31,14 @@ namespace RecipeBook.Api.Controllers
             return Ok(comment);
         }
 
+        [HttpDelete]
+        [Route("comments")]
+        public async Task<IActionResult> DeleteComment(int recipeId)
+        {
+            var result = await _recipeFeedbackService.DeleteCommentAsync(recipeId);
+            return Ok(result);
+        }
+
         [HttpGet]
         [Route("likes")]
         public async Task<IActionResult> GetLikes(int recipeId)
@@ -45,5 +55,12 @@ namespace RecipeBook.Api.Controllers
             return Ok(like);
         }
 
+        [HttpDelete]
+        [Route("likes")]
+        public async Task<IActionResult> DeleteLike(int recipeId)
+        {
+            var result = await _recipeFeedbackService.DeleteLikeAsync(recipeId);
+            return Ok(result);
+        }
     }
 }

@@ -10,13 +10,15 @@ namespace RecipeBook.Api.Services
         Task<string> AddLikeAsync(int recipeId);
         Task<List<Comment>> GetCommentsAsync(int recipeId);
         Task<List<Like>> GetLikesAsync(int recipeId);
+        Task<bool> DeleteCommentAsync(int recipeId);
+        Task<bool> DeleteLikeAsync(int recipeId);
     }
     public class RecipeFeedbackService : IRecipeFeedbackService
     {
         private readonly AppDbContext _context;
-        private readonly UserContextService _userContextService;
+        private readonly IUserContextService _userContextService;
 
-        public RecipeFeedbackService(AppDbContext context, UserContextService userContextService)
+        public RecipeFeedbackService(AppDbContext context, IUserContextService userContextService)
         {
             _context = context;
             _userContextService = userContextService;
@@ -49,6 +51,19 @@ namespace RecipeBook.Api.Services
                 .ToListAsync();
         }
 
+        public async Task<bool> DeleteCommentAsync(int recipeId)
+        {
+            var userId = _userContextService.GetUserId();
+            var comment = await _context.Comments.FindAsync(userId,recipeId);
+            if (comment == null)
+            {
+                throw new Exception("Comment not found.");
+            }
+            _context.Comments.Remove(comment);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
         public async Task<string> AddLikeAsync(int recipeId)
         {
             var userId = _userContextService.GetUserId();
@@ -76,6 +91,20 @@ namespace RecipeBook.Api.Services
                 .Where(l => l.RecipeId == recipeId)
                 .Include(l => l.User)
                 .ToListAsync();
+        }
+
+        public async Task<bool> DeleteLikeAsync(int recipeId)
+        {
+            var userId = _userContextService.GetUserId();
+            var like = await _context.Likes
+                .FirstOrDefaultAsync(l => l.UserId == userId && l.RecipeId == recipeId);
+            if (like == null)
+            {
+                throw new Exception("Like not found.");
+            }
+            _context.Likes.Remove(like);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }
