@@ -34,6 +34,7 @@ namespace RecipeBook.Api.Extensions
             services.AddScoped<IUserContextService, UserContextService>();
             services.AddScoped<IAdminService, AdminService>();
             services.AddScoped<IBudgetService, BudgetService>();
+            services.AddScoped<IRecipeFeedbackService, RecipeFeedbackService>();
             return services;
         }
     }

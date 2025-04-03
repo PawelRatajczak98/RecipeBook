@@ -18,7 +18,6 @@ namespace RecipeBook.Api.Controllers
             _recipeService = recipeService;
         }
 
-
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> Post(RecipeCreateDto recipe)

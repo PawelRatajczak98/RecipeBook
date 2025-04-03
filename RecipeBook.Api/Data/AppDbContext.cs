@@ -15,7 +15,8 @@ namespace RecipeBook.Api.Data
         public DbSet<RecipeIngredient> RecipeIngredients { get; set; }
         public DbSet<Recipe> Recipes { get; set; }
         public DbSet<UserIngredient> UserIngredients { get; set; }
-
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<Like> Likes { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -74,6 +75,31 @@ namespace RecipeBook.Api.Data
                 .WithMany(i=>i.UserIngredients)
                 .HasForeignKey(ui => ui.IngredientId);
 
+            modelBuilder.Entity<Comment>()
+                .HasKey(c => new { c.RecipeId, c.UserId });
+
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.Recipe)
+                .WithMany(r => r.Comments)
+                .HasForeignKey(c => c.RecipeId);
+
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.User)
+                .WithMany(u => u.Comments)
+                .HasForeignKey(c => c.UserId);
+
+            modelBuilder.Entity<Like>()
+                .HasKey(l => new { l.RecipeId, l.UserId });
+
+            modelBuilder.Entity<Like>()
+                .HasOne(l => l.Recipe)
+                .WithMany(r => r.Likes)
+                .HasForeignKey(l => l.RecipeId);
+
+            modelBuilder.Entity<Like>()
+                .HasOne(l => l.User)
+                .WithMany(u => u.Likes)
+                .HasForeignKey(l => l.UserId);
         }
 
     }
